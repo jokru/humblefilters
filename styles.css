@@ -1,0 +1,39 @@
+.not-on-platform {
+    text-decoration: line-through;
+    opacity: 0.5;
+    color: #808080 !important;
+    background-color: #8a8a8a !important;
+}
+
+.not-on-platform .entity-image {
+    display: none !important;
+}
+
+.not-on-platform .entity-meta,
+.not-on-platform .entity-purchase-details {
+    background-color: #6d6c6c !important;
+}
+
+
+
+.owned-game {
+    text-decoration: line-through;
+    opacity: 0.5;
+    color: #808080 !important;
+    background-color: #8a8a8a !important;
+}
+
+.owned-game .entity-image {
+    display: none !important;
+}
+
+.owned-game .entity-meta,
+.owned-game .entity-purchase-details {
+    background-color: #6d6c6c !important;
+}
+
+
+.wishlisted-game .entity-meta,
+.wishlisted-game .entity-purchase-details {
+    background-color: darkgoldenrod !important;
+}
