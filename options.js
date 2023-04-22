@@ -1,7 +1,7 @@
 const platformdiv = document.getElementById('platformdiv');
 
+// Not sure if all of these are valid right now
 platforms = ['steam', 'epic', 'gog', 'origin', 'uplay', 'battlenet', 'xbox', 'psn', 'nintendo', 'drmfree'];
-
 
 platformdiv.innerHTML = platforms.map(p => `<label>${p}: <input id="${p}checkbox" name="platformcheckbox" type="checkbox"></input></label>`).join('<br/>\n');
 
@@ -13,7 +13,7 @@ button.addEventListener('click', () => {
     saveSettings();
 });
 
-chrome.storage.sync.get(['platforms', 'steamid'], (result) => {
+browser.storage.sync.get(['platforms', 'steamid']).then(result => {
     if(!result) return;
     if(result.platforms) {
         for(const platform of result.platforms) {
@@ -35,13 +35,11 @@ const saveSettings = () => {
         }
     }
 
-    var settings = {
+    const settings = {
         "steamid": document.getElementById('steamid').value,
         "platforms": checked
     }
-    console.log(settings);
-    chrome.storage.sync.set(settings, () => {
-        console.log('Settings saved');
+    browser.storage.sync.set(settings).then(() => {
         const saveMessage = document.getElementById('saveMessage');
         saveMessage.innerText = 'Settings saved';
         setTimeout(() => {
