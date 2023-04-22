@@ -2,7 +2,7 @@
 
     "manifest_version": 2,
     "name": "Humble Store Filters",
-    "version": "1.0",
+    "version": "0.0",
     "description": "Adds options to filter on the humble bundle store page based on steam wishlist, owned games and the platforms the game is sold for on humble.",
     "icons": {
         "48": "icons/border-48.png"
@@ -20,10 +20,6 @@
             "css": ["styles.css"]
         }
     ],
-    "options_ui": {
-        "page": "options.html",
-        "chrome_style": true
-    },
     "browser_action": {
         "default_popup": "options.html",
         "browser_style": true
