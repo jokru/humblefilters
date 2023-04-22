@@ -23,7 +23,15 @@ let wishlistGames = []
 // The names might differ with non-alphanumeric characters and case
 const minifyName = (name) => name.toLowerCase().replace(/[\W_]/g, '')
 
+// 5 minutes
+const min5 = 1000 * 60 * 5
+
 const getSteamData = async (userID) => {
+    // Check if last cache is less than 5 minutes old
+    browser.storage.local.get(["cacheTime"]).then(result => {
+        if(result && result.cacheTime && Date.now() - result.cacheTime < min5) return
+    })
+    // Get new data from Steam
     try {
         // Old API (the one we're using here) is not supported, but new one requires API key
         const responseGames = await fetch(`https://steamcommunity.com/profiles/${userID}/games?tab=all&xml=1`)
@@ -55,8 +63,7 @@ const getSteamData = async (userID) => {
     } catch (error) {
         console.error(error)
     }
-    console.log(ownedGames)
-    console.log(wishlistGames)
+    browser.storage.local.set({"ownedGames": ownedGames, "wishlistGames": wishlistGames, "cacheTime": Date.now()})
 }
 
 
@@ -102,7 +109,7 @@ const ownedClass = (entity) => {
 
 const entitySelectors = {}
 entitySelectors[modes.bundles] = '.desktop-tier-collection-view .tier-item-view'
-entitySelectors[modes.store] = '.entity-block-container'
+entitySelectors[modes.store] = '.entity-block-container, .entity-container'
 entitySelectors[modes.keys] = '.unredeemed-keys-table tr'
 entitySelectors[modes.choice] = '.content-choice-tiles .content-choice'
 
@@ -151,6 +158,18 @@ browser.storage.sync.get(['steamid', 'platforms']).then((result) => {
     const goodPlatforms = result.platforms
     if(!goodPlatforms) return
 
+    // First do pass with cached data
+    browser.storage.local.get(["ownedGames", "wishlistGames"]).then(result => {
+        if(result.ownedGames) {
+            ownedGames = result.ownedGames
+        }
+        if(result.wishlistGames) {
+            wishlistGames = result.wishlistGames
+        }
+        addClasses(document.body, goodPlatforms)
+    })
+
+    // Then pass with fresh data
     getSteamData(userID).then(() => {
         addClasses(document.body, goodPlatforms)
     })
