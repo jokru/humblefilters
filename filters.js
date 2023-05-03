@@ -15,7 +15,21 @@ let ownedGames = []
 let wishlistGames = []
 
 // The names might differ with non-alphanumeric characters and case
-const minifyName = (name) => name.toLowerCase().replace(/[\W_]/g, '')
+
+const minifyRules = [
+    // Some games have "(steam)" in their name, but it's not part of the name
+    /(steam)/g,
+    // Remove non-alphanumeric characters
+    /[\W_]/g
+]
+
+const minifyName = (name) => {
+    name = name.toLowerCase()
+    minifyRules.forEach(rule => {
+        name = name.replace(rule, '')
+    })
+    return name
+}
 
 // 5 minutes
 const min5 = 1000 * 60 * 5
@@ -118,8 +132,10 @@ entitySelectors[modes.choice] = '.content-choice-tiles .content-choice'
 
 const addClasses = (node, platforms, platformMode, ownedMode) => {
     if(!node) return
-    if (node.nodeType === Node.TEXT_NODE) return
-    const entities = node.querySelectorAll(entitySelectors[mode])
+    if(node.nodeType === Node.TEXT_NODE) return
+    let entities = node.querySelectorAll(entitySelectors[mode])
+    // Bad fix for keys table TODO: find better fix
+    if(node.nodeName === 'TR') entities = [node]
     entities.forEach(entity => {
         platformClass(entity, platforms, platformMode)
         ownedMode === "enableOwned" && ownedClass(entity)
@@ -152,15 +168,18 @@ if(firstPart === 'membership') {
     mode = modes.choice
 }
 
+
+
+let platformMode = "disablePlatforms"
+let ownedMode = "disableOwned"
+let platforms = []
+
 browser.storage.sync.get(['steamid', 'platforms', 'platformMode', 'ownedMode']).then((result) => {
     if(!result) return
     const userID = result.steamid
-    if(!userID) return
-    const platformMode = result.platformMode
-    if(!platformMode) return
-    let platforms = []
-    if(platformMode !== "disablePlatforms" && platforms) platforms = result.platforms
-    const ownedMode = result.ownedMode || "disableOwned"
+    platforms = result.platforms || platforms
+    platformMode = result.platformMode || platformMode
+    ownedMode = result.ownedMode || ownedMode
 
     // First do pass with cached data
     browser.storage.local.get(["ownedGames", "wishlistGames"]).then(result => {
@@ -174,6 +193,7 @@ browser.storage.sync.get(['steamid', 'platforms', 'platformMode', 'ownedMode']).
     })
 
     // Then pass with fresh data
+    if(ownedMode === "disableOwned") return
     getSteamData(userID).then(() => {
         addClasses(document.body, platforms, platformMode, ownedMode)
     })
@@ -187,7 +207,7 @@ const observer = new MutationObserver((mutations) => {
             // algorithm on each newly added node.
             for (let i = 0; i < mutation.addedNodes.length; i++) {
                 const newNode = mutation.addedNodes[i];
-                addClasses(newNode);
+                addClasses(newNode, platforms, platformMode, ownedMode);
             }
         }
     });
