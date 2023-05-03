@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>Humble Bundle Filters</title>
+        <link rel="stylesheet" href="options.css"/>
+    </head>
+    <body class="optionsDialog">
+        <h1>Humble Bundle Filters</h1>
+        <fieldset>
+            <legend>Owned game filtering:</legend>
+            <div>
+                <input type="radio" id="disableOwned" name="ownedRadio" value="disableOwned"/>
+                <label for="disableOwned">Disable owned filtering</label>
+                <input type="radio" id="enableOwned" name="ownedRadio" value="enableOwned"/>
+                <label for="enableOwned">Enable owned filtering</label>
+            </div>
+        </fieldset>
+        <fieldset id="steamSettings">
+            <legend>SteamID: (dec)</legend>
+            <input id="steamid" name="steamid"/>
+            <a href="https://www.steamidfinder.com/lookup" target="_blank">SteamID Finder</a><br />
+        </fieldset>
+        <fieldset>
+            <legend>Platform filtering:</legend>
+            <div>
+                <input type="radio" id="disablePlatforms" name="platformsRadio" value="disablePlatforms"/>
+                <label for="disablePlatforms">Disable platform filtering</label>
+                <input type="radio" id="goodPlatforms" name="platformsRadio" value="goodPlatforms"/>
+                <label for="goodPlatforms">Good platforms</label>
+                <input type="radio" id="badPlatforms" name="platformsRadio" value="badPlatforms"/>
+                <label for="badPlatforms">Bad platforms</label>
+            </div>
+        </fieldset>
+        <fieldset id="platformdiv">
+        </fieldset>
+        <div>
+            <button id="saveButton">Save</button>
+        </div>
+        <p><span id="saveMessage"></span></p>
+        <footer>
+            <a href="https://github.com/jokru/humblefilters" target="_blank">Github</a>
+            <span id="version">Version: 0.0</span>
+        </footer>
+        <script src="options.js"></script>
+    </body>
+
+</html>

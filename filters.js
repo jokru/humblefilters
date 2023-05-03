@@ -1,9 +1,3 @@
-
-// TODO: Move to settings dialog
-// const goodPlatforms = ["steam"]
-const badPlatforms = []
-
-
 const modes = {
     "bundles": 0,
     "store": 1,
@@ -68,10 +62,12 @@ const getSteamData = async (userID) => {
 
 
 
-const platformClass = (entity, goodPlatforms) => {
+const platformClass = (entity, platforms, platformMode) => {
+    if(platformMode === 'disablePlatforms') return
     const platformElems = entity.querySelector('.platforms')
     const elemPlatforms = []
     if(!platformElems || !platformElems.children) return
+    // Get all platform names from the element
     for(i = 0; i < platformElems.children.length; i++) {
         const platformElem = platformElems.children[i]
         let platformName = platformElem.classList[platformElems.classList.length]
@@ -79,10 +75,15 @@ const platformClass = (entity, goodPlatforms) => {
         elemPlatforms.push(platformName)
     }
 
-    // If the game isn't on any good platforms
-    if((goodPlatforms && !elemPlatforms.some(p => goodPlatforms.includes(p))) ||
-    // Or if the game is only on bad platforms
-        elemPlatforms.every(p => badPlatforms.includes(p))) {
+    let condition = false
+    if(platformMode === 'goodPlatforms') {
+        // If the game isn't on any good platforms
+        condition = !elemPlatforms.some(p => platforms.includes(p))
+    } else if(platformMode === 'badPlatforms') {
+        // Or if the game is only on bad platforms
+        condition = elemPlatforms.every(p => platforms.includes(p))
+    }
+    if(condition) {
         entity.classList.add("not-on-platform")
     }
 }
@@ -115,13 +116,13 @@ entitySelectors[modes.choice] = '.content-choice-tiles .content-choice'
 
 
 
-const addClasses = (node, goodPlatforms) => {
+const addClasses = (node, platforms, platformMode, ownedMode) => {
     if(!node) return
     if (node.nodeType === Node.TEXT_NODE) return
     const entities = node.querySelectorAll(entitySelectors[mode])
     entities.forEach(entity => {
-        platformClass(entity, goodPlatforms)
-        ownedClass(entity)
+        platformClass(entity, platforms, platformMode)
+        ownedMode === "enableOwned" && ownedClass(entity)
     })
 }
 
@@ -151,12 +152,15 @@ if(firstPart === 'membership') {
     mode = modes.choice
 }
 
-browser.storage.sync.get(['steamid', 'platforms']).then((result) => {
+browser.storage.sync.get(['steamid', 'platforms', 'platformMode', 'ownedMode']).then((result) => {
     if(!result) return
     const userID = result.steamid
     if(!userID) return
-    const goodPlatforms = result.platforms
-    if(!goodPlatforms) return
+    const platformMode = result.platformMode
+    if(!platformMode) return
+    let platforms = []
+    if(platformMode !== "disablePlatforms" && platforms) platforms = result.platforms
+    const ownedMode = result.ownedMode || "disableOwned"
 
     // First do pass with cached data
     browser.storage.local.get(["ownedGames", "wishlistGames"]).then(result => {
@@ -166,12 +170,12 @@ browser.storage.sync.get(['steamid', 'platforms']).then((result) => {
         if(result.wishlistGames) {
             wishlistGames = result.wishlistGames
         }
-        addClasses(document.body, goodPlatforms)
+        addClasses(document.body, platforms, platformMode, ownedMode)
     })
 
     // Then pass with fresh data
     getSteamData(userID).then(() => {
-        addClasses(document.body, goodPlatforms)
+        addClasses(document.body, platforms, platformMode, ownedMode)
     })
 })
 

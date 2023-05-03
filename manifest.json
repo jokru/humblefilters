@@ -5,7 +5,8 @@
     "version": "0.0",
     "description": "Adds options to filter on the humble bundle store page based on steam wishlist, owned games and the platforms the game is sold for on humble.",
     "icons": {
-        "48": "icons/border-48.png"
+        "48": "icons/icon-48.png",
+        "96": "icons/icon-96.png"
     },
     "permissions": [
         "webRequest",
@@ -21,11 +22,11 @@
         }
     ],
     "browser_action": {
-        "default_popup": "options.html",
+        "default_popup": "options/options.html",
         "browser_style": true
     },
     "background": {
-        "page": "options.html"
+        "page": "options/options.html"
     },
     "applications": {
 		"gecko": {
