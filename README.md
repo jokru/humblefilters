@@ -4,6 +4,7 @@ This is a browser extension (currently) for firefox, which enabled different fil
 - Steam wishlisted games highlighting
 - Marking all but selected platform
 
+Available on [addons.mozilla.org](https://addons.mozilla.org/en-US/firefox/addon/humble-store-filters/)
 
 #  TODO:
 - Improve options css
