@@ -8,9 +8,8 @@ Available on [addons.mozilla.org](https://addons.mozilla.org/en-US/firefox/addon
 
 #  TODO:
 - Improve options css
-- Make different filters optional
 - Make chrome version with polyfill (See below)
-- Some games may have different names on humlbe and steam
+- Some games may have different names on humble and steam
 
 # Current issues
 - Games on a wrong platform, but wishlisted on steam show both css styles (no picture, strikethrough text, but highlighted color)
