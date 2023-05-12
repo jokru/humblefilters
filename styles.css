@@ -34,6 +34,7 @@
 
 
 .wishlisted-game .entity-meta,
-.wishlisted-game .entity-purchase-details {
+.wishlisted-game .entity-purchase-details,
+.wishlisted-game .entity {
     background-color: rgba(212, 191, 0, 0.7) !important;
 }
