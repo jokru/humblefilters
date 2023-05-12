@@ -57,23 +57,21 @@ browser.storage.sync.get(['platforms', 'steamid', 'platformMode', 'ownedMode']).
     if(result.steamid) {
         document.getElementById('steamid').value = result.steamid;
     }
-    if(result.platformMode) {
-        platformRadioValue = result.platformMode;
-        document.getElementById(result.platformMode).checked = true;
-        if(platformRadioValue === 'disablePlatforms') {
-            platformdiv.style.display = 'none';
-        } else {
-            platformdiv.style.display = 'block';
-        }
+
+    if(result.platformMode) platformRadioValue = result.platformMode;
+    document.getElementById(platformRadioValue).checked = true;
+    if(platformRadioValue === 'disablePlatforms') {
+        platformdiv.style.display = 'none';
+    } else {
+        platformdiv.style.display = 'block';
     }
-    if(result.ownedMode) {
-        ownedRadioValue = result.ownedMode;
-        document.getElementById(result.ownedMode).checked = true;
-        if(ownedRadioValue === 'disableOwned') {
-            steamSettings.style.display = 'none';
-        } else {
-            steamSettings.style.display = 'block';
-        }
+
+    if(result.ownedMode) ownedRadioValue = result.ownedMode;
+    document.getElementById(ownedRadioValue).checked = true;
+    if(ownedRadioValue === 'disableOwned') {
+        steamSettings.style.display = 'none';
+    } else {
+        steamSettings.style.display = 'block';
     }
 });
 
