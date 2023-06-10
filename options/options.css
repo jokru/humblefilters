@@ -2,3 +2,10 @@
     background-color: #1a1a1a !important;
     color: #fff !important;
 }
+
+input:invalid {
+    background-color: ivory;
+    border: none;
+    outline: 2px solid red;
+    border-radius: 5px;
+}
