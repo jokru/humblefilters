@@ -53,7 +53,6 @@ const getSteamData = async (userID) => {
         const parser = new DOMParser()
         const xmlData = parser.parseFromString(xmlString, 'text/xml')
         const data = JSON.parse(xml2json(xmlData, '  '))
-        console.log(data)
         // Get names from JSON
         if(!data) {
             console.log("HBF: No response from Steam")
