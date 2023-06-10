@@ -28,6 +28,7 @@ const minifyRules = [
 ]
 
 const minifyName = (name) => {
+    if(!name) return
     name = name.toLowerCase()
     minifyRules.forEach(rule => {
         name = name.replace(rule, '')
@@ -52,8 +53,29 @@ const getSteamData = async (userID) => {
         const parser = new DOMParser()
         const xmlData = parser.parseFromString(xmlString, 'text/xml')
         const data = JSON.parse(xml2json(xmlData, '  '))
+        console.log(data)
         // Get names from JSON
-        const games = data.gamesList.games.game
+        if(!data) {
+            console.log("HBF: No response from Steam")
+            return
+        }
+        const steamData = data.gamesList
+        if(!steamData) {
+            console.log("HBF: Response from Steam doesn't contain data")
+            return
+        }
+        const gamesList = steamData.games
+        if(!gamesList) {
+            let str = "HBF: Response from Steam doesn't contain games"
+            if (steamData.steamID) str += `, Steam ID: ${steamData.steamID["#cdata"]}`
+            console.log(str)
+            return
+        }
+        const games = gamesList.game
+        if(!games) {
+            console.log("HBF: Response from Steam has gamelist but doesn't contain games")
+            return
+        }
         ownedGames = games.map(game => minifyName(game.name["#cdata"]))
     } catch (error) {
         console.error(error)
@@ -65,6 +87,7 @@ const getSteamData = async (userID) => {
         while(true) {
             const responseWishlist = await fetch(`https://store.steampowered.com/wishlist/profiles/${userID}/wishlistdata/?p=${p++}`)
             const data = await responseWishlist.json()
+            if(!data) break
             const newGames = Object.values(data).map(game => minifyName(game.name))
             if(newGames.length === 0) break
             wishlistGamesTemp.push(...newGames)
