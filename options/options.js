@@ -17,6 +17,12 @@ button.addEventListener('click', () => {
 });
 
 
+const steamIDinput = document.getElementById('steamid');
+steamIDinput.addEventListener('input', (e) => {
+    // Only allow numbers
+    steamIDinput.value = steamIDinput.value.replace(/\D/g,'');
+})
+
 var platformRadioValue = "disablePlatforms";
 platformdiv.style.display = 'none';
 const platformRadios = document.getElementsByName('platformsRadio');
@@ -86,7 +92,7 @@ const saveSettings = () => {
     }
 
     const settings = {
-        "steamid": document.getElementById('steamid').value,
+        "steamid": steamIDinput.value,
         "platforms": checked,
         "platformMode": platformRadioValue || "disablePlatforms",
         "ownedMode": ownedRadioValue || "disableOwned"
