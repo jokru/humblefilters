@@ -12,7 +12,9 @@
         "webRequest",
         "storage",
         "https://steamcommunity.com/profiles/*/games?tab=all&xml=1",
-        "https://store.steampowered.com/wishlist/profiles/*/wishlistdata/?p=*"
+        "https://store.steampowered.com/wishlist/profiles/*/wishlistdata/?p=*",
+        "https://store.steampowered.com/dynamicstore/userdata/",
+        "https://api.steampowered.com/ISteamApps/GetAppList/v0002"
     ],
     "content_scripts": [
         {

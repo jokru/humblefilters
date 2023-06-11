@@ -14,6 +14,9 @@ function delay(time) {
 let ownedGames = []
 let wishlistGames = []
 
+let nameToAppID = {}
+let appIDToName = {}
+
 // The names might differ with non-alphanumeric characters and case
 
 const minifyRules = [
@@ -36,13 +39,98 @@ const minifyName = (name) => {
     return name
 }
 
-// 5 minutes
-const min5 = 1000 * 60 * 5
+// Time constants
+const _5min = 1000 * 60 * 5
+const _1hour = 1000 * 60 * 60
+
+// Used to get the names of the games from appIDs
+const getSteamGames = async () => {
+    // Check if last cache is less than 1 hour old
+    const result = await browser.storage.local.get(["slowCacheTime", "appIDToName"])
+    appIDToName = result.appIDToName
+
+    if(result && result.slowCacheTime && Date.now() - result.slowCacheTime < _1hour) return
+
+    const responseGames = await fetch(`https://api.steampowered.com/ISteamApps/GetAppList/v2/`)
+    const data = await responseGames.json()
+    const games = data.applist.apps
+
+    // Don't need nametoappid yet, but might be useful later
+    // const tempNameToAppID = {}
+    const tempAppIDToName = {}
+
+    games.forEach(game => {
+        // tempNameToAppID[minifyName(game.name)] = game.appid
+        tempAppIDToName[game.appid] = minifyName(game.name)
+    })
+    // nameToAppID = tempNameToAppID
+    appIDToName = tempAppIDToName
+
+
+    browser.storage.local.set({
+        // "nameToAppID": nameToAppID, 
+        "appIDToName": appIDToName, 
+        "slowCacheTime": Date.now()
+    })
+    // console.log(nameToAppID)
+    // console.log(appIDToName)
+}
 
 const getSteamData = async (userID) => {
     // Check if last cache is less than 5 minutes old
+    const result = await browser.storage.local.get(["fastCacheTime"])
+    if(result && result.fastCacheTime && Date.now() - result.fastCacheTime < _5min) return
+
+    // Get new data from Steam
+    try {
+        const response = await fetch(`https://store.steampowered.com/dynamicstore/userdata`,
+        {
+            credentials: 'include',
+            headers: {
+                // Stolen from https://github.com/SteamDatabase/BrowserExtension/
+                // Pretend we're doing a normal navigation request.
+                // This will trigger login.steampowered.com redirect flow if user has expired cookies.
+                Accept: 'text/html',
+            }
+        })
+        // console.log(response)
+        const data = await response.json()
+        console.log(data)
+        if( !data || !data.rgOwnedApps || !data.rgOwnedApps.length ) {
+            throw new Error( 'Are you logged on the Steam Store in this browser?' );
+        }
+        
+        const wishlist = data.rgWishlist
+        const owned = data.rgOwnedApps
+
+        let notFound = {}
+        const getGameName = (appID) => {
+            const name = appIDToName[appID]
+            if(!name) {
+                notFound[appID] = true
+            }
+            return name //|| appID
+        }
+
+        ownedGames = owned.map(appID => getGameName(appID))
+        wishlistGames = wishlist.map(appID => getGameName(appID))
+
+        // console.log("not found", Object.keys(notFound))
+
+        // console.log(ownedGames)
+        // console.log(wishlistGames)
+        browser.storage.local.set({"ownedGames": ownedGames, "wishlistGames": wishlistGames, "fastCacheTime": Date.now()})
+    } catch (error) {
+        console.error(error)
+    }
+}
+
+
+// Let's keep this old function, in case we want to support it as an option
+const _oldGetSteamData = async (userID) => {
+    // Check if last cache is less than 5 minutes old
     browser.storage.local.get(["cacheTime"]).then(result => {
-        if(result && result.cacheTime && Date.now() - result.cacheTime < min5) return
+        if(result && result.cacheTime && Date.now() - result.cacheTime < _5min) return
     })
     // Get new data from Steam
     try {
@@ -200,13 +288,14 @@ let platformMode = "disablePlatforms"
 let ownedMode = "disableOwned"
 let platforms = []
 
-browser.storage.sync.get(['steamid', 'platforms', 'platformMode', 'ownedMode']).then((result) => {
+browser.storage.sync.get(['steamid', 'platforms', 'platformMode', 'ownedMode']).then(async (result) => {
     if(!result) return
     const userID = result.steamid
     platforms = result.platforms || platforms
     platformMode = result.platformMode || platformMode
     ownedMode = result.ownedMode || ownedMode
 
+    await getSteamGames()
     // First do pass with cached data
     browser.storage.local.get(["ownedGames", "wishlistGames"]).then(result => {
         if(result.ownedGames) {
