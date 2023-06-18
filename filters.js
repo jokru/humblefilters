@@ -14,7 +14,7 @@ let wishlistGames = []
 // Time constants
 const _5min = 1000 * 60 * 5
 
-const platformClass = (entity, platforms, platformMode) => {
+const applyPlatformClass = (entity, platforms, platformMode) => {
     if(platformMode === 'disablePlatforms') return
     const platformElems = entity.querySelector('.platforms')
     const elemPlatforms = []
@@ -40,13 +40,15 @@ const platformClass = (entity, platforms, platformMode) => {
     }
 }
 
-const titleSelectors = {}
-titleSelectors[modes.bundles] = '.item-title'
-titleSelectors[modes.store] = '.entity-title'
-titleSelectors[modes.keys] = 'h4'
-titleSelectors[modes.choice] = '.content-choice-title'
 
-const ownedClass = (entity) => {
+const titleSelectors = {
+    [modes.bundles]: '.item-title',
+    [modes.store]: '.entity-title',
+    [modes.keys]: 'h4',
+    [modes.choice]: '.content-choice-title'
+}
+
+const applyOwnedClass = (entity) => {
     const title = entity.querySelector(titleSelectors[mode])
     if(title) {
         const titleText = minifyName(title.innerText)
@@ -60,13 +62,13 @@ const ownedClass = (entity) => {
     }
 }
 
-const entitySelectors = {}
-entitySelectors[modes.bundles] = '.desktop-tier-collection-view .tier-item-view'
-entitySelectors[modes.store] = '.entity-block-container, .entity-container'
-entitySelectors[modes.keys] = '.unredeemed-keys-table tr'
-entitySelectors[modes.choice] = '.content-choice-tiles .content-choice'
 
-
+const entitySelectors = {
+    [modes.bundles]: '.desktop-tier-collection-view .tier-item-view',
+    [modes.store]: '.entity-block-container, .entity-container',
+    [modes.keys]: '.unredeemed-keys-table tr',
+    [modes.choice]: '.content-choice-tiles .content-choice'
+}
 
 const addClasses = (node, platforms, platformMode, ownedMode) => {
     if(!node) return
@@ -75,8 +77,8 @@ const addClasses = (node, platforms, platformMode, ownedMode) => {
     // Bad fix for keys table TODO: find better fix
     if(node.nodeName === 'TR') entities = [node]
     entities.forEach(entity => {
-        platformClass(entity, platforms, platformMode)
-        ownedMode === "enableOwned" && ownedClass(entity)
+        applyPlatformClass(entity, platforms, platformMode)
+        ownedMode !== "disableOwned" && applyOwnedClass(entity)
     })
 }
 
@@ -114,12 +116,12 @@ let platforms = []
 
 browser.storage.sync.get(['platforms', 'platformMode', 'ownedMode', 'fastCacheTime']).then(async (result) => {
     if(!result) return
-    const userID = result.steamid
     platforms = result.platforms || platforms
     platformMode = result.platformMode || platformMode
     ownedMode = result.ownedMode || ownedMode
 
     // First do pass with cached data
+    // This is done to avoid waiting for the first time
     browser.storage.local.get(["ownedGames", "wishlistGames"]).then(result => {
         if(result.ownedGames) {
             ownedGames = result.ownedGames
@@ -141,7 +143,7 @@ browser.storage.sync.get(['platforms', 'platformMode', 'ownedMode', 'fastCacheTi
     ownedGames = response.ownedGames || ownedGames
     wishlistGames = response.wishlistGames || wishlistGames
 
-        addClasses(document.body, platforms, platformMode, ownedMode)
+    addClasses(document.body, platforms, platformMode, ownedMode)
 
     browser.storage.local.set({ownedGames, wishlistGames, "fastCacheTime": Date.now()})
 })
