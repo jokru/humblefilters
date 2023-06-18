@@ -28,7 +28,8 @@
         "browser_style": true
     },
     "background": {
-        "page": "options/options.html"
+        "scripts": ["utils.js", "background.js"],
+        "persistent": false
     },
     "applications": {
 		"gecko": {
