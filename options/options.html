@@ -13,14 +13,24 @@
             <div>
                 <input type="radio" id="disableOwned" name="ownedRadio" value="disableOwned"/>
                 <label for="disableOwned">Disable owned filtering</label>
-                <input type="radio" id="enableOwned" name="ownedRadio" value="enableOwned"/>
-                <label for="enableOwned">Enable owned filtering</label>
+                <input type="radio" id="ownedSteamID" name="ownedRadio" value="ownedSteamID"/>
+                <label for="ownedSteamID">SteamID (no DLC)</label>
+                <input type="radio" id="ownedLogin" name="ownedRadio" value="ownedLogin"/>
+                <label for="ownedLogin">Steam store login</label>
             </div>
         </fieldset>
         <fieldset id="steamSettings">
-            <legend>SteamID: (dec)</legend>
+            <legend>SteamID</legend>
+            <p>This version doesn't support DLC.</p>
+            <label for="steamid">SteamID: (dec)</label>
             <input id="steamid" name="steamid" pattern="\d+"/>
             <a href="https://www.steamidfinder.com/lookup" target="_blank">SteamID Finder</a><br />
+        </fieldset>
+        <fieldset id="steamLogin">
+            <legend>Steam login</legend>
+            <p>Logging in to the steam store on this browser is required to get owned games from Steam.</p>
+            <p>This version supports DLC.</p>
+            <a href="https://store.steampowered.com/" target="_blank">Steam store</a>
         </fieldset>
         <fieldset>
             <legend>Platform filtering:</legend>

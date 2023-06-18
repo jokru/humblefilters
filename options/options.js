@@ -39,16 +39,25 @@ for(const radio of platformRadios) {
 
 var ownedRadioValue = "disableOwned";
 const steamSettings = document.getElementById('steamSettings');
-const ownedRadios = document.getElementsByName('ownedRadio');
+const steamLoginDiv = document.getElementById('steamLogin');
 
+const updateOwnedRadio = () => {
+    steamLoginDiv.style.display = 'none';
+    steamSettings.style.display = 'none';
+    
+    if(ownedRadioValue === 'ownedSteamID') {
+        steamSettings.style.display = 'block';
+    } else if(ownedRadioValue === 'ownedLogin') {
+        steamLoginDiv.style.display = 'block';
+    }
+}
+updateOwnedRadio()
+
+const ownedRadios = document.getElementsByName('ownedRadio');
 for(const radio of ownedRadios) {
     radio.addEventListener('change', () => {
         ownedRadioValue = radio.value;
-        if(ownedRadioValue === 'disableOwned') {
-            steamSettings.style.display = 'none';
-        } else {
-            steamSettings.style.display = 'block';
-        }
+        updateOwnedRadio();
     });
 }
 
@@ -74,11 +83,7 @@ browser.storage.sync.get(['platforms', 'steamid', 'platformMode', 'ownedMode']).
 
     if(result.ownedMode) ownedRadioValue = result.ownedMode;
     document.getElementById(ownedRadioValue).checked = true;
-    if(ownedRadioValue === 'disableOwned') {
-        steamSettings.style.display = 'none';
-    } else {
-        steamSettings.style.display = 'block';
-    }
+    updateOwnedRadio()
 });
 
 
