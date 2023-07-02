@@ -12,12 +12,14 @@
         "webRequest",
         "storage",
         "https://steamcommunity.com/profiles/*/games?tab=all&xml=1",
-        "https://store.steampowered.com/wishlist/profiles/*/wishlistdata/?p=*"
+        "https://store.steampowered.com/wishlist/profiles/*/wishlistdata/?p=*",
+        "https://store.steampowered.com/dynamicstore/userdata/",
+        "https://api.steampowered.com/ISteamApps/GetAppList/v0002"
     ],
     "content_scripts": [
         {
             "matches": ["*://*.humblebundle.com/*"],
-            "js": ["filters.js", "xml2json.js"],
+            "js": ["utils.js", "filters.js"],
             "css": ["styles.css"]
         }
     ],
@@ -26,7 +28,8 @@
         "browser_style": true
     },
     "background": {
-        "page": "options/options.html"
+        "scripts": ["xml2json.js", "utils.js", "background.js"],
+        "persistent": false
     },
     "applications": {
 		"gecko": {

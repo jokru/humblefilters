@@ -13,14 +13,41 @@
             <div>
                 <input type="radio" id="disableOwned" name="ownedRadio" value="disableOwned"/>
                 <label for="disableOwned">Disable owned filtering</label>
-                <input type="radio" id="enableOwned" name="ownedRadio" value="enableOwned"/>
-                <label for="enableOwned">Enable owned filtering</label>
+                <input type="radio" id="ownedLogin" name="ownedRadio" value="ownedLogin"/>
+                <label for="ownedLogin">Steam store login</label>
+                <div id="advancedModes">
+                    <input type="radio" id="ownedSteamID" name="ownedRadio" value="ownedSteamID"/>
+                    <label for="ownedSteamID">SteamID</label>
+                    <input type="radio" id="ownedAPIKey" name="ownedRadio" value="ownedAPIKey"/>
+                    <label for="ownedAPIKey">Steam API key</label>
+                </div>
             </div>
         </fieldset>
-        <fieldset id="steamSettings">
-            <legend>SteamID: (dec)</legend>
+        <fieldset id="steamIDSettings">
+            <legend>SteamID</legend>
+            <p>This version requires a public profile.</p>
+            <p>This version doesn't support DLC.</p>
+            <label for="steamid">SteamID: (dec)</label>
             <input id="steamid" name="steamid" pattern="\d+"/>
             <a href="https://www.steamidfinder.com/lookup" target="_blank">SteamID Finder</a><br />
+        </fieldset>
+        <fieldset id="steamAPIKeySettings">
+            <legend>Steam API key</legend>
+            <p>This version requires an API key from Steam. Get one <a href="https://steamcommunity.com/dev/apikey">here</a>.</p>
+            <p>This version doesn't support DLC.</p>
+            <label for="steamapikey">Steam API key:</label>
+            <input id="steamapikey" name="steamapikey"/>
+            <a href="https://www.steamidfinder.com/lookup" target="_blank">Steam API key generation</a>
+            <br/>
+            <label for="steamidapi">SteamID: (dec)</label>
+            <input id="steamidapi" name="steamidapi" pattern="\d+"/>
+            <a href="https://www.steamidfinder.com/lookup" target="_blank">SteamID Finder</a><br />
+        </fieldset>
+        <fieldset id="steamLogin">
+            <legend>Steam login</legend>
+            <p>Logging in to the steam store on this browser is required to get owned games from Steam.</p>
+            <p>This version supports DLC.</p>
+            <a href="https://store.steampowered.com/" target="_blank">Steam store</a>
         </fieldset>
         <fieldset>
             <legend>Platform filtering:</legend>
@@ -39,6 +66,10 @@
             <button id="saveButton">Save</button>
         </div>
         <p><span id="saveMessage"></span></p>
+        <div title="These don't add anything and work worse than the steam store login mode">
+            <label for="showAdvanced">Show advanced modes (not recommended):</label>
+            <input type="checkbox" id="showAdvanced" name="showAdvanced" value="showAdvanced"/>
+        </div>
         <footer>
             <a href="https://github.com/jokru/humblefilters" target="_blank">Github</a>
             <span id="version">Version: 0.0</span>
