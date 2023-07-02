@@ -52,7 +52,6 @@ const applyOwnedClass = (entity) => {
     const title = entity.querySelector(titleSelectors[mode])
     if(title) {
         const titleText = minifyName(title.innerText)
-        // console.log(titleText)
         if(ownedGames.includes(titleText)) {
             entity.classList.add("owned-game")
         }
@@ -138,7 +137,10 @@ browser.storage.sync.get(['platforms', 'platformMode', 'ownedMode', 'fastCacheTi
 
     const response = await browser.runtime.sendMessage({type: "ownedGames"})
     if(!response) return
-    if(response.error) return console.error(response.error)
+    if(response.error) {
+        console.log("HBF: Error in background script:")
+        return console.error(response.error)
+    }
 
     ownedGames = response.ownedGames || ownedGames
     wishlistGames = response.wishlistGames || wishlistGames

@@ -75,12 +75,8 @@ const getSteamUserDataLogin = async () => {
 
 // This uses an old API that doesn't require an API key, has wishlist, but doesn't return DLC
 const getSteamUserDataID = async (userID) => {
-    // Check if last cache is less than 5 minutes old
-    browser.storage.local.get([]).then(result => {
-        if(result && result.cacheTime && Date.now() - result.cacheTime < _5min) {
-            return {ownedGames: result.ownedGames, wishlistGames: result.wishlistGames}
-        }
-    })
+    let ownedGames = []
+    let wishlistGames = []
     // Get new data from Steam
     try {
         // Old API (the one we're using here) is not supported, but new one requires API key
@@ -89,7 +85,6 @@ const getSteamUserDataID = async (userID) => {
         const xmlString = await responseGames.text()
         const parser = new DOMParser()
         const xmlData = parser.parseFromString(xmlString, 'text/xml')
-        console.log(xmlData)
         const data = JSON.parse(xml2json(xmlData, '  '))
         // Get names from JSON
         if(!data) {
@@ -135,7 +130,7 @@ const getSteamUserDataID = async (userID) => {
     } catch (error) {
         console.error(error)
     }
-    browser.storage.local.set({"ownedGames": ownedGames, "wishlistGames": wishlistGames, "cacheTime": Date.now()})
+    return {ownedGames, wishlistGames}
 }
 
 // The new API version requires an API key and doesn't support wishlist or DLC so it's worse than the SteamID one
@@ -147,9 +142,9 @@ const getSteamUserDataAPIKey = async (userID, apiKey) => {
     params.set( 'include_played_free_games', 1 );
 
     const response = await fetch(`https://api.steampowered.com/IPlayerService/GetOwnedGames/v1/?${params.toString()}`)
-    // console.log(response)
     const data = await response.json()
-    // console.log(data)
+    const ownedGames = data.response.games.map(game => minifyName(game.name))
+    return {ownedGames}
 }
 
 const getSteamUserData = async () => {
@@ -161,13 +156,17 @@ const getSteamUserData = async () => {
     
     // Check if last cache is less than 5 minutes old or if there's no data
     if(!(result.fastCacheTime && Date.now() - result.fastCacheTime < _5min) || ownedGames.length === 0 || wishlistGames.length === 0) {
-        const resultSync = await browser.storage.sync.get(['ownedMode', 'steamid'])
-        
+        const resultSync = await browser.storage.sync.get(['ownedMode', 'steamid', 'steamapikey'])
+        if(!resultSync) return
         if(resultSync.ownedMode === "ownedSteamID") {
-            if(!resultSync.userID) error = new Error("HBF: No Steam ID")
+            if(!resultSync.steamid) error = new Error("HBF: No Steam ID")
             else ({ownedGames, wishlistGames, error} = await getSteamUserDataID(resultSync.steamid))
         } else if(resultSync.ownedMode === "ownedLogin") {
             ({ownedGames, wishlistGames, error} = await getSteamUserDataLogin())
+        } else if(resultSync.ownedMode === "ownedAPIKey") {
+            if(!resultSync.steamapikey) error = new Error("HBF: No API key")
+            else if(!resultSync.steamid) error = new Error("HBF: No Steam ID")
+            else ({ownedGames, wishlistGames, error} = await getSteamUserDataAPIKey(resultSync.steamid, resultSync.steamapikey))
         }
         browser.storage.local.set({ownedGames, wishlistGames, "fastCacheTime": Date.now()})
     }
