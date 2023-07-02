@@ -38,17 +38,21 @@ for(const radio of platformRadios) {
 }
 
 var ownedRadioValue = "disableOwned";
-const steamSettings = document.getElementById('steamSettings');
+const steamIDSettings = document.getElementById('steamIDSettings');
 const steamLoginDiv = document.getElementById('steamLogin');
+const steamAPIKeySettings = document.getElementById('steamAPIKeySettings');
 
 const updateOwnedRadio = () => {
     steamLoginDiv.style.display = 'none';
-    steamSettings.style.display = 'none';
+    steamIDSettings.style.display = 'none';
+    steamAPIKeySettings.style.display = 'none';
     
     if(ownedRadioValue === 'ownedSteamID') {
-        steamSettings.style.display = 'block';
+        steamIDSettings.style.display = 'block';
     } else if(ownedRadioValue === 'ownedLogin') {
         steamLoginDiv.style.display = 'block';
+    } else if(ownedRadioValue === 'ownedAPIKey') {
+        steamAPIKeySettings.style.display = 'block';
     }
 }
 updateOwnedRadio()
@@ -61,8 +65,24 @@ for(const radio of ownedRadios) {
     });
 }
 
+const showAdvanced = document.getElementById('showAdvanced');
+const advancedModes = document.getElementById('advancedModes');
 
-browser.storage.sync.get(['platforms', 'steamid', 'platformMode', 'ownedMode']).then(result => {
+const updateAdvancedModes = () => {
+    if(showAdvanced.checked) {
+        advancedModes.style.display = 'block';
+    } else {
+        advancedModes.style.display = 'none';
+    }
+}
+
+showAdvanced.addEventListener('change', () => {
+    updateAdvancedModes();
+});
+updateAdvancedModes();
+
+
+browser.storage.sync.get(['platforms', 'steamid', 'platformMode', 'ownedMode', 'showAdvanced', 'steamapikey']).then(result => {
     if(!result) return;
     if(result.platforms) {
         for(const platform of result.platforms) {
@@ -71,6 +91,14 @@ browser.storage.sync.get(['platforms', 'steamid', 'platformMode', 'ownedMode']).
     }
     if(result.steamid) {
         document.getElementById('steamid').value = result.steamid;
+        document.getElementById('steamidapi').value = result.steamid;
+    }
+    if(result.showAdvanced) {
+        showAdvanced.checked = result.showAdvanced;
+        updateAdvancedModes();
+    }
+    if(result.steamapikey) {
+        document.getElementById('steamapikey').value = result.steamapikey;
     }
 
     if(result.platformMode) platformRadioValue = result.platformMode;
@@ -100,7 +128,9 @@ const saveSettings = () => {
         "steamid": steamIDinput.value,
         "platforms": checked,
         "platformMode": platformRadioValue || "disablePlatforms",
-        "ownedMode": ownedRadioValue || "disableOwned"
+        "ownedMode": ownedRadioValue || "disableOwned",
+        "showAdvanced": showAdvanced.checked,
+        "steamapikey": document.getElementById('steamapikey').value
     }
     browser.storage.sync.set(settings).then(() => {
         const saveMessage = document.getElementById('saveMessage');
