@@ -19,7 +19,7 @@
     "content_scripts": [
         {
             "matches": ["*://*.humblebundle.com/*"],
-            "js": ["xml2json.js", "utils.js", "filters.js"],
+            "js": ["utils.js", "filters.js"],
             "css": ["styles.css"]
         }
     ],
@@ -28,7 +28,7 @@
         "browser_style": true
     },
     "background": {
-        "scripts": ["utils.js", "background.js"],
+        "scripts": ["xml2json.js", "utils.js", "background.js"],
         "persistent": false
     },
     "applications": {
