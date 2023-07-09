@@ -1,3 +1,5 @@
+import minifyName from './utils.js'
+// import xml2json from './xml2json.js'
 
 let browserAPI = chrome;
 if(typeof browser !== 'undefined') {
@@ -186,6 +188,7 @@ const getSteamUserData = async () => {
 browserAPI.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
     switch (message.type) {
         case 'ownedGames': return getSteamUserData();
+        case 'minifyName': return minifyName(message.name);
         default: return new Promise((resolve) => resolve({error: new Error(`HBF: Unknown message type: ${message.type}`)}));
     }
 });

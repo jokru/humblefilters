@@ -2,6 +2,20 @@ let browserAPI = chrome;
 if(typeof browser !== 'undefined') {
     browserAPI = browser;
 }
+
+const minifyName = async(name) => {
+    if(!name) return
+    // Firefox does not support importing modules in content scripts
+    // To avoid writing minifyName twice, we send a message to the background script
+    const response = await browserAPI.runtime.sendMessage({type: "minifyName", name})
+    if(!response) return
+    if(response.error) {
+        console.log("HBF: Error in background script:")
+        return console.error(response.error)
+    }
+    return response
+}
+
 const modes = {
     "bundles": 0,
     "store": 1,
@@ -52,10 +66,10 @@ const titleSelectors = {
     [modes.choice]: '.content-choice-title'
 }
 
-const applyOwnedClass = (entity) => {
+const applyOwnedClass = async (entity) => {
     const title = entity.querySelector(titleSelectors[mode])
     if(title) {
-        const titleText = minifyName(title.innerText)
+        const titleText = await minifyName(title.innerText)
         if(ownedGames.includes(titleText)) {
             entity.classList.add("owned-game")
         }

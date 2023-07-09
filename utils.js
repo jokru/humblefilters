@@ -20,3 +20,5 @@ const minifyName = (name) => {
     })
     return name
 }
+
+export default minifyName
