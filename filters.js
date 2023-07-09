@@ -1,3 +1,7 @@
+let browserAPI = chrome;
+if(typeof browser !== 'undefined') {
+    browserAPI = browser;
+}
 const modes = {
     "bundles": 0,
     "store": 1,
@@ -113,7 +117,7 @@ let platformMode = "disablePlatforms"
 let ownedMode = "disableOwned"
 let platforms = []
 
-browser.storage.sync.get(['platforms', 'platformMode', 'ownedMode', 'fastCacheTime']).then(async (result) => {
+browserAPI.storage.sync.get(['platforms', 'platformMode', 'ownedMode', 'fastCacheTime']).then(async (result) => {
     if(!result) return
     platforms = result.platforms || platforms
     platformMode = result.platformMode || platformMode
@@ -121,7 +125,7 @@ browser.storage.sync.get(['platforms', 'platformMode', 'ownedMode', 'fastCacheTi
 
     // First do pass with cached data
     // This is done to avoid waiting for the first time
-    browser.storage.local.get(["ownedGames", "wishlistGames"]).then(result => {
+    browserAPI.storage.local.get(["ownedGames", "wishlistGames"]).then(result => {
         if(result.ownedGames) {
             ownedGames = result.ownedGames
         }
@@ -135,7 +139,7 @@ browser.storage.sync.get(['platforms', 'platformMode', 'ownedMode', 'fastCacheTi
 
     if(result.fastCacheTime && Date.now() - result.fastCacheTime < _5min) return
 
-    const response = await browser.runtime.sendMessage({type: "ownedGames"})
+    const response = await browserAPI.runtime.sendMessage({type: "ownedGames"})
     if(!response) return
     if(response.error) {
         console.log("HBF: Error in background script:")
@@ -147,7 +151,7 @@ browser.storage.sync.get(['platforms', 'platformMode', 'ownedMode', 'fastCacheTi
 
     addClasses(document.body, platforms, platformMode, ownedMode)
 
-    browser.storage.local.set({ownedGames, wishlistGames, "fastCacheTime": Date.now()})
+    browserAPI.storage.local.set({ownedGames, wishlistGames, "fastCacheTime": Date.now()})
 })
 
 

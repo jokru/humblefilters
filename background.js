@@ -1,5 +1,7 @@
-function delay(time) {
-    return new Promise(resolve => setTimeout(resolve, time));
+
+let browserAPI = chrome;
+if(typeof browser !== 'undefined') {
+    browserAPI = browser;
 }
 
 // function delay(time) {
@@ -12,7 +14,7 @@ const _1hour = 1000 * 60 * 60
 
 // Used to get the names of the games from appIDs
 const getAllSteamGames = async () => {
-    const result = await browser.storage.local.get(["slowCacheTime", "appIDToName"])
+    const result = await browserAPI.storage.local.get(["slowCacheTime", "appIDToName"])
     let appIDToName = result.appIDToName
     
     // Check if last cache is less than 1 hour old
@@ -32,7 +34,7 @@ const getAllSteamGames = async () => {
         // const nameToAppID = tempNameToAppID
         appIDToName = tempAppIDToName
     
-        browser.storage.local.set({
+        browserAPI.storage.local.set({
             // "nameToAppID": nameToAppID, 
             "appIDToName": appIDToName, 
             "slowCacheTime": Date.now()
@@ -152,7 +154,7 @@ const getSteamUserDataAPIKey = async (userID, apiKey) => {
 }
 
 const getSteamUserData = async () => {
-    const result = await browser.storage.local.get(['ownedGames', 'wishlistGames', 'fastCacheTime'])
+    const result = await browserAPI.storage.local.get(['ownedGames', 'wishlistGames', 'fastCacheTime'])
     if(!result) return
     let ownedGames = result.ownedGames || []
     let wishlistGames = result.wishlistGames || []
@@ -160,7 +162,7 @@ const getSteamUserData = async () => {
     
     // Check if last cache is less than 5 minutes old or if there's no data
     if(!(result.fastCacheTime && Date.now() - result.fastCacheTime < _5min) || ownedGames.length === 0 || wishlistGames.length === 0) {
-        const resultSync = await browser.storage.sync.get(['ownedMode', 'steamid', 'steamapikey'])
+        const resultSync = await browserAPI.storage.sync.get(['ownedMode', 'steamid', 'steamapikey'])
         if(!resultSync) return
         if(resultSync.ownedMode === "ownedSteamID") {
             if(!resultSync.steamid) error = new Error("HBF: No Steam ID")
@@ -172,7 +174,7 @@ const getSteamUserData = async () => {
             else if(!resultSync.steamid) error = new Error("HBF: No Steam ID")
             else ({ownedGames, wishlistGames, error} = await getSteamUserDataAPIKey(resultSync.steamid, resultSync.steamapikey))
         }
-        browser.storage.local.set({ownedGames, wishlistGames, "fastCacheTime": Date.now()})
+        browserAPI.storage.local.set({ownedGames, wishlistGames, "fastCacheTime": Date.now()})
     }
     
     // if(ownedGames.length === 0) error = new Error("HBF: No owned games found")
@@ -181,7 +183,7 @@ const getSteamUserData = async () => {
 }
 
 
-browser.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
+browserAPI.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
     switch (message.type) {
         case 'ownedGames': return getSteamUserData();
         default: return new Promise((resolve) => resolve({error: new Error(`HBF: Unknown message type: ${message.type}`)}));
