@@ -1,7 +1,7 @@
 const platformdiv = document.getElementById('platformdiv');
 
 // Not sure if all of these are valid right now
-platforms = ['steam', 'epic', 'gog', 'origin', 'uplay', 'battlenet', 'xbox', 'psn', 'nintendo', 'drmfree'];
+const platforms = ['steam', 'epic', 'gog', 'origin', 'uplay', 'battlenet', 'xbox', 'psn', 'nintendo', 'drmfree'];
 
 platformdiv.innerHTML = `<legend>Choose platforms: </legend>` +
                             platforms.map(p => `<label>${p}: <input id="${p}checkbox" name="platformcheckbox" type="checkbox"></input></label>`).join('<br/>\n')
@@ -115,6 +115,22 @@ browser.storage.sync.get(['platforms', 'steamid', 'platformMode', 'ownedMode', '
 });
 
 
+async function requestPermissions(permissionsToRequest) {
+    function onResponse(response) {
+      if (response) {
+        console.log("Permission was granted");
+      } else {
+        console.log("Permission was refused");
+      }
+      return browser.permissions.getAll();
+    }
+  
+    const response = await browser.permissions.request(permissionsToRequest);
+    const currentPermissions = await onResponse(response);
+  
+    console.log(`Current permissions:`, currentPermissions);
+}
+
 const saveSettings = () => {
     const checkboxes = document.getElementsByName('platformcheckbox');
     const checked = [];
@@ -132,6 +148,28 @@ const saveSettings = () => {
         "showAdvanced": showAdvanced.checked,
         "steamapikey": document.getElementById('steamapikey').value
     }
+
+    // Adding this remove breaks the permissions request
+    // let prevPermissions = await browser.permissions.getAll();
+    // await browser.permissions.remove({ origins: prevPermissions.origins });
+    const permissions = {}
+    // Required for all modes
+    permissions.origins = ["*://*.humblebundle.com/*", "https://api.steampowered.com/ISteamApps/GetAppList/v0002"];
+    
+    if(settings.ownedMode === 'ownedSteamID') {
+        permissions.origins.push("https://steamcommunity.com/profiles/*/games?tab=all&xml=1")
+    } else if(settings.ownedMode === 'ownedLogin') {
+        permissions.origins.push("https://store.steampowered.com/dynamicstore/userdata/")
+        permissions.origins.push("https://login.steampowered.com/")
+    } else if(settings.ownedMode === 'ownedAPIKey') {
+        permissions.origins.push("https://api.steampowered.com/IPlayerService/GetOwnedGames/v1/")
+    }
+
+    if(["ownedSteamID", "ownedAPIKey"].includes(settings.ownedMode)) {
+        permissions.origins.push("https://store.steampowered.com/wishlist/profiles/*/wishlistdata/?p=*")
+    }
+    requestPermissions(permissions);
+
     browser.storage.sync.set(settings).then(() => {
         const saveMessage = document.getElementById('saveMessage');
         saveMessage.innerText = 'Settings saved';
