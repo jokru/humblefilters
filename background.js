@@ -155,20 +155,22 @@ const getSteamUserDataAPIKey = async (userID, apiKey) => {
     return {ownedGames}
 }
 
-const getSteamUserData = async () => {
+const getSteamUserData = async (sendResponse) => {
     const result = await browserAPI.storage.local.get(['ownedGames', 'wishlistGames', 'fastCacheTime'])
-    if(!result) return
+    if(!result) return sendResponse({error: new Error("HBF: No result from storage")})
+
     let ownedGames = result.ownedGames || []
     let wishlistGames = result.wishlistGames || []
     let error = null
-    
+
     // Check if last cache is less than 5 minutes old or if there's no data
     if(!(result.fastCacheTime && Date.now() - result.fastCacheTime < _5min) || ownedGames.length === 0 || wishlistGames.length === 0) {
         const resultSync = await browserAPI.storage.sync.get(['ownedMode', 'steamid', 'steamapikey'])
-        if(!resultSync) return
+        if(!resultSync) return sendResponse({error: new Error("HBF: No result from sync storage")})
         if(resultSync.ownedMode === "ownedSteamID") {
-            if(!resultSync.steamid) error = new Error("HBF: No Steam ID")
-            else ({ownedGames, wishlistGames, error} = await getSteamUserDataID(resultSync.steamid))
+            // Deprecated for now
+            // if(!resultSync.steamid) error = new Error("HBF: No Steam ID")
+            // else ({ownedGames, wishlistGames, error} = await getSteamUserDataID(resultSync.steamid))
         } else if(resultSync.ownedMode === "ownedLogin") {
             ({ownedGames, wishlistGames, error} = await getSteamUserDataLogin())
         } else if(resultSync.ownedMode === "ownedAPIKey") {
@@ -181,15 +183,16 @@ const getSteamUserData = async () => {
     
     // if(ownedGames.length === 0) error = new Error("HBF: No owned games found")
     // if(wishlistGames.length === 0) error = new Error("HBF: No wishlist games found")
-    return new Promise((resolve) => resolve({ownedGames, wishlistGames, error}))
+    sendResponse({ownedGames, wishlistGames, error})
 }
 
 
-browserAPI.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
+browserAPI.runtime.onMessage.addListener((message, sender, sendResponse) => {
     switch (message.type) {
-        case 'ownedGames': return getSteamUserData();
-        case 'minifyName': return minifyName(message.name);
-        default: return new Promise((resolve) => resolve({error: new Error(`HBF: Unknown message type: ${message.type}`)}));
+        case 'ownedGames': getSteamUserData(sendResponse); return true;
+        case 'minifyName': sendResponse(minifyName(message.name)); return true;
     }
+    sendResponse({error: new Error(`HBF: Unknown message type: ${message.type}`)});
+    return true;
 });
 console.log("HBF: background script loaded")
