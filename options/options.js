@@ -1,3 +1,8 @@
+let browserAPI = chrome;
+if(typeof browser !== 'undefined') {
+    browserAPI = browser;
+}
+
 const platformdiv = document.getElementById('platformdiv');
 
 // Not sure if all of these are valid right now
@@ -8,7 +13,7 @@ platformdiv.innerHTML = `<legend>Choose platforms: </legend>` +
 
 
 const versionSpan = document.getElementById('version');
-versionSpan.innerText = "Version: " + browser.runtime.getManifest().version;
+versionSpan.innerText = "Version: " + browserAPI.runtime.getManifest().version;
 
 
 const button = document.getElementById('saveButton');
@@ -21,6 +26,12 @@ const steamIDinput = document.getElementById('steamid');
 steamIDinput.addEventListener('input', (e) => {
     // Only allow numbers
     steamIDinput.value = steamIDinput.value.replace(/\D/g,'');
+})
+
+const steamIDapiInput = document.getElementById('steamidapi');
+steamIDapiInput.addEventListener('input', (e) => {
+    // Only allow numbers
+    steamIDapiInput.value = steamIDapiInput.value.replace(/\D/g,'');
 })
 
 var platformRadioValue = "disablePlatforms";
@@ -82,7 +93,7 @@ showAdvanced.addEventListener('change', () => {
 updateAdvancedModes();
 
 
-browser.storage.sync.get(['platforms', 'steamid', 'platformMode', 'ownedMode', 'showAdvanced', 'steamapikey']).then(result => {
+browserAPI.storage.sync.get(['platforms', 'steamid', 'platformMode', 'ownedMode', 'showAdvanced', 'steamapikey']).then(result => {
     if(!result) return;
     if(result.platforms) {
         for(const platform of result.platforms) {
@@ -122,10 +133,10 @@ async function requestPermissions(permissionsToRequest) {
       } else {
         console.log("Permission was refused");
       }
-      return browser.permissions.getAll();
+      return browserAPI.permissions.getAll();
     }
   
-    const response = await browser.permissions.request(permissionsToRequest);
+    const response = await browserAPI.permissions.request(permissionsToRequest);
     const currentPermissions = await onResponse(response);
   
     console.log(`Current permissions:`, currentPermissions);
@@ -141,7 +152,7 @@ const saveSettings = () => {
     }
 
     const settings = {
-        "steamid": steamIDinput.value,
+        "steamid": steamIDinput.value || steamIDapiInput.value,
         "platforms": checked,
         "platformMode": platformRadioValue || "disablePlatforms",
         "ownedMode": ownedRadioValue || "disableOwned",
@@ -150,8 +161,8 @@ const saveSettings = () => {
     }
 
     // Adding this remove breaks the permissions request
-    // let prevPermissions = await browser.permissions.getAll();
-    // await browser.permissions.remove({ origins: prevPermissions.origins });
+    // let prevPermissions = await browserAPI.permissions.getAll();
+    // await browserAPI.permissions.remove({ origins: prevPermissions.origins });
     const permissions = {}
     // Required for all modes
     permissions.origins = ["*://*.humblebundle.com/*", "https://api.steampowered.com/ISteamApps/GetAppList/v0002"];
@@ -170,7 +181,7 @@ const saveSettings = () => {
     }
     requestPermissions(permissions);
 
-    browser.storage.sync.set(settings).then(() => {
+    browserAPI.storage.sync.set(settings).then(() => {
         const saveMessage = document.getElementById('saveMessage');
         saveMessage.innerText = 'Settings saved';
         setTimeout(() => {

@@ -1,40 +1,49 @@
 {
-    "manifest_version": 3,
-    "name": "Humble Store Filters",
-    "version": "0.5.2",
-    "description": "Adds options to filter on the humble bundle store page based on steam wishlist, owned games and the platforms the game is sold for on humble.",
-    "icons": {
-        "48": "icons/icon-48.png",
-        "96": "icons/icon-96.png"
-    },
-    "permissions": [
-        "webRequest",
-        "storage"
-    ],
-    "optional_host_permissions": [
-        "https://steamcommunity.com/profiles/*/games?tab=all&xml=1",
-        "https://store.steampowered.com/wishlist/profiles/*/wishlistdata/?p=*",
-        "https://store.steampowered.com/dynamicstore/userdata/",
-        "https://api.steampowered.com/ISteamApps/GetAppList/v0002",
-        "https://api.steampowered.com/IPlayerService/GetOwnedGames/v1/",
-        "https://login.steampowered.com/"
-    ],
-    "content_scripts": [
-        {
-            "matches": ["*://*.humblebundle.com/*"],
-            "js": ["utils.js", "filters.js"],
-            "css": ["styles.css"]
-        }
-    ],
-    "action": {
-        "default_popup": "options/options.html"
-    },
-    "background": {
-        "scripts": ["xml2json.js", "utils.js", "background.js"]
-    },
-    "browser_specific_settings": {
-		"gecko": {
-            "id": "humblefilters@jokru"
-        }
+  "manifest_version": 3,
+  "name": "Humble Store Filters",
+  "version": "0.6.0",
+  "description": "Adds options to filter on the humble bundle store page based on steam wishlist, owned games and the platforms the game is sold for on humble.",
+  "icons": {
+    "48": "icons/icon-48.png",
+    "96": "icons/icon-96.png"
+  },
+  "permissions": [
+    "webRequest",
+    "storage"
+  ],
+  "host_permissions": [
+    "https://steamcommunity.com/profiles/*/games?tab=all&xml=1",
+    "https://store.steampowered.com/wishlist/profiles/*/wishlistdata/?p=*",
+    "https://store.steampowered.com/dynamicstore/userdata/",
+    "https://api.steampowered.com/ISteamApps/GetAppList/v0002",
+    "https://api.steampowered.com/IPlayerService/GetOwnedGames/v1/",
+    "https://login.steampowered.com/"
+  ],
+  "content_scripts": [
+    {
+      "matches": [
+        "*://*.humblebundle.com/*"
+      ],
+      "js": [
+        "filters.js"
+      ],
+      "css": [
+        "styles.css"
+      ]
     }
+  ],
+  "action": {
+    "default_popup": "options/options.html"
+  },
+  "background": {
+    "type": "module",
+    "scripts": [
+      "background.js"
+    ]
+  },
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "humblefilters@jokru"
+    }
+  }
 }

@@ -1,6 +1,14 @@
-function delay(time) {
-    return new Promise(resolve => setTimeout(resolve, time));
+import minifyName from './utils.js'
+// import xml2json from './xml2json.js'
+
+let browserAPI = chrome;
+if(typeof browser !== 'undefined') {
+    browserAPI = browser;
 }
+
+// function delay(time) {
+//     return new Promise(resolve => setTimeout(resolve, time));
+// }
 
 // Time constants
 const _5min = 1000 * 60 * 5
@@ -8,7 +16,7 @@ const _1hour = 1000 * 60 * 60
 
 // Used to get the names of the games from appIDs
 const getAllSteamGames = async () => {
-    const result = await browser.storage.local.get(["slowCacheTime", "appIDToName"])
+    const result = await browserAPI.storage.local.get(["slowCacheTime", "appIDToName"])
     let appIDToName = result.appIDToName
     
     // Check if last cache is less than 1 hour old
@@ -28,7 +36,7 @@ const getAllSteamGames = async () => {
         // const nameToAppID = tempNameToAppID
         appIDToName = tempAppIDToName
     
-        browser.storage.local.set({
+        browserAPI.storage.local.set({
             // "nameToAppID": nameToAppID, 
             "appIDToName": appIDToName, 
             "slowCacheTime": Date.now()
@@ -74,64 +82,64 @@ const getSteamUserDataLogin = async () => {
 }
 
 // This uses an old API that doesn't require an API key, has wishlist, but doesn't return DLC
-const getSteamUserDataID = async (userID) => {
-    let ownedGames = []
-    let wishlistGames = []
-    // Get new data from Steam
-    try {
-        // Old API (the one we're using here) is not supported, but new one requires API key
-        const responseGames = await fetch(`https://steamcommunity.com/profiles/${userID}/games?tab=all&xml=1`)
-        // Parse XML response
-        const xmlString = await responseGames.text()
-        const parser = new DOMParser()
-        const xmlData = parser.parseFromString(xmlString, 'text/xml')
-        const data = JSON.parse(xml2json(xmlData, '  '))
-        // Get names from JSON
-        if(!data) {
-            console.log("HBF: No response from Steam")
-            return
-        }
-        const steamData = data.gamesList
-        if(!steamData) {
-            console.log("HBF: Response from Steam doesn't contain data")
-            return
-        }
-        const gamesList = steamData.games
-        if(!gamesList) {
-            let str = "HBF: Response from Steam doesn't contain games"
-            if (steamData.steamID) str += `, Steam ID: ${steamData.steamID["#cdata"]}`
-            console.log(str)
-            return
-        }
-        const games = gamesList.game
-        if(!games) {
-            console.log("HBF: Response from Steam has gamelist but doesn't contain games")
-            return
-        }
-        ownedGames = games.map(game => minifyName(game.name["#cdata"]))
-    } catch (error) {
-        console.error(error)
-    }
-    try {
-        // Wishlist is paged
-        const wishlistGamesTemp = []
-        var p = 0
-        while(true) {
-            const responseWishlist = await fetch(`https://store.steampowered.com/wishlist/profiles/${userID}/wishlistdata/?p=${p++}`)
-            const data = await responseWishlist.json()
-            if(!data) break
-            const newGames = Object.values(data).map(game => minifyName(game.name))
-            if(newGames.length === 0) break
-            wishlistGamesTemp.push(...newGames)
-            // Add delay to prevent rate limiting
-            await delay(500)
-        }
-        wishlistGames = wishlistGamesTemp
-    } catch (error) {
-        console.error(error)
-    }
-    return {ownedGames, wishlistGames}
-}
+// const getSteamUserDataID = async (userID) => {
+//     let ownedGames = []
+//     let wishlistGames = []
+//     // Get new data from Steam
+//     try {
+//         // Old API (the one we're using here) is not supported, but new one requires API key
+//         const responseGames = await fetch(`https://steamcommunity.com/profiles/${userID}/games?tab=all&xml=1`)
+//         // Parse XML response
+//         const xmlString = await responseGames.text()
+//         const parser = new DOMParser()
+//         const xmlData = parser.parseFromString(xmlString, 'text/xml')
+//         const data = JSON.parse(xml2json(xmlData, '  '))
+//         // Get names from JSON
+//         if(!data) {
+//             console.log("HBF: No response from Steam")
+//             return
+//         }
+//         const steamData = data.gamesList
+//         if(!steamData) {
+//             console.log("HBF: Response from Steam doesn't contain data")
+//             return
+//         }
+//         const gamesList = steamData.games
+//         if(!gamesList) {
+//             let str = "HBF: Response from Steam doesn't contain games"
+//             if (steamData.steamID) str += `, Steam ID: ${steamData.steamID["#cdata"]}`
+//             console.log(str)
+//             return
+//         }
+//         const games = gamesList.game
+//         if(!games) {
+//             console.log("HBF: Response from Steam has gamelist but doesn't contain games")
+//             return
+//         }
+//         ownedGames = games.map(game => minifyName(game.name["#cdata"]))
+//     } catch (error) {
+//         console.error(error)
+//     }
+//     // try {
+//     //     // Wishlist is paged
+//     //     const wishlistGamesTemp = []
+//     //     var p = 0
+//     //     while(true) {
+//     //         const responseWishlist = await fetch(`https://store.steampowered.com/wishlist/profiles/${userID}/wishlistdata/?p=${p++}`)
+//     //         const data = await responseWishlist.json()
+//     //         if(!data) break
+//     //         const newGames = Object.values(data).map(game => minifyName(game.name))
+//     //         if(newGames.length === 0) break
+//     //         wishlistGamesTemp.push(...newGames)
+//     //         // Add delay to prevent rate limiting
+//     //         await delay(500)
+//     //     }
+//     //     wishlistGames = wishlistGamesTemp
+//     // } catch (error) {
+//     //     console.error(error)
+//     // }
+//     return {ownedGames, wishlistGames}
+// }
 
 // The new API version requires an API key and doesn't support wishlist or DLC so it's worse than the SteamID one
 const getSteamUserDataAPIKey = async (userID, apiKey) => {
@@ -147,20 +155,22 @@ const getSteamUserDataAPIKey = async (userID, apiKey) => {
     return {ownedGames}
 }
 
-const getSteamUserData = async () => {
-    const result = await browser.storage.local.get(['ownedGames', 'wishlistGames', 'fastCacheTime'])
-    if(!result) return
+const getSteamUserData = async (sendResponse) => {
+    const result = await browserAPI.storage.local.get(['ownedGames', 'wishlistGames', 'fastCacheTime'])
+    if(!result) return sendResponse({error: new Error("HBF: No result from storage")})
+
     let ownedGames = result.ownedGames || []
     let wishlistGames = result.wishlistGames || []
     let error = null
-    
+
     // Check if last cache is less than 5 minutes old or if there's no data
     if(!(result.fastCacheTime && Date.now() - result.fastCacheTime < _5min) || ownedGames.length === 0 || wishlistGames.length === 0) {
-        const resultSync = await browser.storage.sync.get(['ownedMode', 'steamid', 'steamapikey'])
-        if(!resultSync) return
+        const resultSync = await browserAPI.storage.sync.get(['ownedMode', 'steamid', 'steamapikey'])
+        if(!resultSync) return sendResponse({error: new Error("HBF: No result from sync storage")})
         if(resultSync.ownedMode === "ownedSteamID") {
-            if(!resultSync.steamid) error = new Error("HBF: No Steam ID")
-            else ({ownedGames, wishlistGames, error} = await getSteamUserDataID(resultSync.steamid))
+            // Deprecated for now
+            // if(!resultSync.steamid) error = new Error("HBF: No Steam ID")
+            // else ({ownedGames, wishlistGames, error} = await getSteamUserDataID(resultSync.steamid))
         } else if(resultSync.ownedMode === "ownedLogin") {
             ({ownedGames, wishlistGames, error} = await getSteamUserDataLogin())
         } else if(resultSync.ownedMode === "ownedAPIKey") {
@@ -168,19 +178,21 @@ const getSteamUserData = async () => {
             else if(!resultSync.steamid) error = new Error("HBF: No Steam ID")
             else ({ownedGames, wishlistGames, error} = await getSteamUserDataAPIKey(resultSync.steamid, resultSync.steamapikey))
         }
-        browser.storage.local.set({ownedGames, wishlistGames, "fastCacheTime": Date.now()})
+        browserAPI.storage.local.set({ownedGames, wishlistGames, "fastCacheTime": Date.now()})
     }
     
     // if(ownedGames.length === 0) error = new Error("HBF: No owned games found")
     // if(wishlistGames.length === 0) error = new Error("HBF: No wishlist games found")
-    return new Promise((resolve) => resolve({ownedGames, wishlistGames, error}))
+    sendResponse({ownedGames, wishlistGames, error})
 }
 
 
-browser.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
+browserAPI.runtime.onMessage.addListener((message, sender, sendResponse) => {
     switch (message.type) {
-        case 'ownedGames': return getSteamUserData();
-        default: return new Promise((resolve) => resolve({error: new Error(`HBF: Unknown message type: ${message.type}`)}));
+        case 'ownedGames': getSteamUserData(sendResponse); return true;
+        case 'minifyName': sendResponse(minifyName(message.name)); return true;
     }
+    sendResponse({error: new Error(`HBF: Unknown message type: ${message.type}`)});
+    return true;
 });
 console.log("HBF: background script loaded")

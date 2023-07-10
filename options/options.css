@@ -1,6 +1,7 @@
 .optionsDialog {
     background-color: #1a1a1a !important;
     color: #fff !important;
+    min-width: 300px;
 }
 
 input:invalid {
