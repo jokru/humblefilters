@@ -1,0 +1,20 @@
+{
+  "name": "humbleimprovements",
+  "version": "0.6.0",
+  "description": "This is a browser extension (currently) for firefox, which enabled different filters for items available on the humbldebundle website and humble store. Filters include:\r - Steam owned games marking\r - Steam wishlisted games highlighting\r - Marking all but selected platform",
+  "main": "background.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "web-ext build",
+    "build-chrome": "npx convert-manifest-format --chrome && web-ext build -a web-ext-chromium && npx convert-manifest-format --firefox",
+    "build-all": "npm run-script build && npm run-script build-chrome",
+    "run": "web-ext run",
+    "run-chrome": "npx convert-manifest-format --chrome && web-ext run -t chromium && npx convert-manifest-format --firefox"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "convert-manifest-format": "^0.4.0",
+    "web-ext": "^7.6.2"
+  }
+}
