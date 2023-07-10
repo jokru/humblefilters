@@ -28,6 +28,12 @@ steamIDinput.addEventListener('input', (e) => {
     steamIDinput.value = steamIDinput.value.replace(/\D/g,'');
 })
 
+const steamIDapiInput = document.getElementById('steamidapi');
+steamIDapiInput.addEventListener('input', (e) => {
+    // Only allow numbers
+    steamIDapiInput.value = steamIDapiInput.value.replace(/\D/g,'');
+})
+
 var platformRadioValue = "disablePlatforms";
 platformdiv.style.display = 'none';
 const platformRadios = document.getElementsByName('platformsRadio');
@@ -146,7 +152,7 @@ const saveSettings = () => {
     }
 
     const settings = {
-        "steamid": steamIDinput.value,
+        "steamid": steamIDinput.value || steamIDapiInput.value,
         "platforms": checked,
         "platformMode": platformRadioValue || "disablePlatforms",
         "ownedMode": ownedRadioValue || "disableOwned",
