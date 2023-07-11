@@ -82,6 +82,10 @@ const getSteamUserDataLogin = async () => {
 }
 
 // This uses an old API that doesn't require an API key, has wishlist, but doesn't return DLC
+// Deprecated for now
+// Add these permissions to manifest.json if reimplemented:
+// "https://steamcommunity.com/profiles/*/games?tab=all&xml=1",
+// "https://store.steampowered.com/wishlist/profiles/*/wishlistdata/?p=*",
 // const getSteamUserDataID = async (userID) => {
 //     let ownedGames = []
 //     let wishlistGames = []
