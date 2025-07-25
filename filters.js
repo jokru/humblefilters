@@ -20,7 +20,8 @@ const modes = {
     "bundles": 0,
     "store": 1,
     "keys": 2,
-    "choice": 3
+    "choice": 3,
+    "frontPage": 4
 }
 // 
 let mode = 0
@@ -63,7 +64,8 @@ const titleSelectors = {
     [modes.bundles]: '.item-title',
     [modes.store]: '.entity-title',
     [modes.keys]: 'h4',
-    [modes.choice]: '.content-choice-title'
+    [modes.choice]: '.content-choice-title',
+    [modes.frontPage]: '.name'
 }
 
 const applyOwnedClass = async (entity) => {
@@ -84,7 +86,8 @@ const entitySelectors = {
     [modes.bundles]: '.desktop-tier-collection-view .tier-item-view',
     [modes.store]: '.entity-block-container, .entity-container',
     [modes.keys]: '.unredeemed-keys-table tr',
-    [modes.choice]: '.content-choice-tiles .content-choice'
+    [modes.choice]: '.content-choice-tiles .content-choice',
+    [modes.frontPage]: '.tile-info'
 }
 
 const addClasses = (node, platforms, platformMode, ownedMode) => {
@@ -112,6 +115,9 @@ const parts = curURL.split('/')
 const firstPart = parts[1]
 const lastPart = parts[parts.length - 1]
 
+if (!firstPart) {
+    mode = modes.frontPage
+}
 if(firstPart === 'games') {
     mode = modes.bundles
 }
