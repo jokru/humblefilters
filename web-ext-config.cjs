@@ -8,4 +8,6 @@ module.exports = {
         'package.json',
         'web-ext-config.js'
     ],
+    sourceDir: "./app",
+    
 }
