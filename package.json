@@ -1,6 +1,6 @@
 {
   "name": "humbleimprovements",
-  "version": "0.6.0",
+  "version": "0.6.2",
   "description": "This is a browser extension (currently) for firefox, which enabled different filters for items available on the humbldebundle website and humble store. Filters include:\r - Steam owned games marking\r - Steam wishlisted games highlighting\r - Marking all but selected platform",
   "main": "background.js",
   "scripts": {
